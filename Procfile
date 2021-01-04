@@ -1,1 +1,1 @@
-web: gunicorn vb-dashboard:index
+web: gunicorn app:app
