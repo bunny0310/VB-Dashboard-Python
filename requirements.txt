@@ -46,7 +46,6 @@ python-socketio==4.6.1
 pytz==2020.1
 redis==3.5.3
 requests==2.23.0
-Robinhood==1.0.1
 six==1.14.0
 SQLAlchemy==1.3.20
 SQLAlchemy-serializer==1.3.4.4
