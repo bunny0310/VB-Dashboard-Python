@@ -92,6 +92,7 @@ def infoTags():
     for k, v in sortedFreqs[0:5]:
         labels.append(k)
     
+    plt.clf()
     plt.pie(freqArr, labels=labels, shadow=True, explode=[0.01, 0.01, 0.01, 0.01, 0.01])
     plt.legend(title='Top 5 Tags:')
     plt.savefig(username + '-pie.png')
@@ -153,15 +154,16 @@ def info():
     
     vals = list(types.values())
     labels = list(types.keys())
-    plt.pie(vals, labels=labels, shadow=True, )
+    plt.clf()
+    plt.pie(vals, labels=labels, shadow=True)
     plt.legend(title='Breakdown by types of words:', bbox_to_anchor=(1, 0.83), loc="center right", fontsize=10, 
            bbox_transform=plt.gcf().transFigure)
     plt.savefig(username + '-types.png')
     with open(username + '-types.png', "rb") as img_file:
-        imgString = base64.b64encode(img_file.read()).decode('utf-8')
-        if os.path.exists(username + '-types.png'):
-            os.remove(username + '-types.png')
-            print('file removed')
+        typesImgStr = base64.b64encode(img_file.read()).decode('utf-8')
+        # if os.path.exists(username + '-types.png'):
+        #     os.remove(username + '-types.png')
+        #     print('file removed')
         
-        ans['types'] = imgString
+        ans['types'] = typesImgStr
         return make_response(jsonify({"msg": ans}))
