@@ -130,14 +130,14 @@ def info():
             if d1 >= d2:
                 recentWords.append(word)
     
-    # if not recent:
-    #     recentWords = list(listWords)
+    if not recent:
+        recentWords = list(listWords)
 
     print(len(recentWords))
     ans = {}
     types = {}
 
-    ans['wordcount'] = len(recentWords)
+    ans['wordcount'] = len(list(recentWords))
     tags = TagsFromWords(recentWords);
     freqs = Counter(tags)
     keys = list(freqs.keys())
