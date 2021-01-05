@@ -10,6 +10,11 @@ from PIL import Image
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 from collections import Counter
 import base64, os
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import datetime 
+matplotlib.use('Agg')
 
 app = Flask(__name__)
 CORS(app) 
@@ -18,9 +23,15 @@ db = client['db']
 users = db.users
 words = db.words
 
+
 # method to convert a word to a list of tags
-def mapWordToTags(word):
-    return word.tags
+def TagsFromWords(words):
+    tags = []
+    for word in words:
+        tags.extend(word['tags'])
+    
+    tags = list(filter(None, tags))
+    return tags
 
 #mask for book cloud
 # bookMask = np.array(Image.open("book.png"))
@@ -33,6 +44,8 @@ def tags():
     
     username = data['username'];
     user = users.find_one({'username': username})
+    if user is None:
+        return jsonify({"message": "user not found"})
     uid = user['_id'];
     words = globals()['words'].find({'user': uid})
     tags = []
@@ -54,3 +67,101 @@ def tags():
         print('file removed')
 
     return make_response({"msg": str(imgString)})
+
+@app.route('/monthly-tags-info', methods = ['POST'])
+def infoTags():
+    data = request.get_json()
+    if 'username' not in data:
+        return jsonify({"message": "incorrectly formated data"})   
+    username = data['username']
+
+    user = users.find_one({'username': username});
+    if user is None:
+        return jsonify({"message": "user not found"}) 
+    
+    listWords = words.find({'user': user['_id']})
+    tags = TagsFromWords(listWords);
+    freqs = Counter(tags)
+    vals = list(freqs.values())
+    vals.sort()
+    vals.reverse()
+    freqArr = np.array(vals[0:5])
+    labels = list()
+    sortedFreqs = sorted(freqs.items(), key=lambda item: item[1])
+    sortedFreqs.reverse()
+    for k, v in sortedFreqs[0:5]:
+        labels.append(k)
+    
+    plt.pie(freqArr, labels=labels, shadow=True, explode=[0.01, 0.01, 0.01, 0.01, 0.01])
+    plt.legend(title='Top 5 Tags:')
+    plt.savefig(username + '-pie.png')
+    with open(username + '-pie.png', "rb") as img_file:
+        imgString = base64.b64encode(img_file.read()).decode('utf-8')
+        if os.path.exists(username + '-pie.png'):
+            os.remove(username + '-pie.png')
+            print('file removed')
+        return make_response(jsonify({"msg": imgString}))
+
+@app.route('/acc-info', methods = ['POST'])    
+def info():
+    data = request.get_json()
+
+    if 'username' not in data:
+        return jsonify({"message": "incorrectly formated data"})   
+    username = data['username']
+
+    user = users.find_one({'username': username});
+    if user is None:
+        return jsonify({"message": "user not found"}) 
+    
+    recent = True
+    if 'recent' not in data:
+        print('regular')
+        recent = False
+    
+    uid = user['_id'];
+    listWords = words.find({'user': user['_id']}).sort('createdAt', -1)
+    today = datetime.datetime.today()
+    d2 = datetime.datetime(today.year, today.month, 1)
+    recentWords = []
+    if recent:
+        for word in listWords:
+            d1 = word['createdAt']
+            if d1 >= d2:
+                recentWords.append(word)
+    
+    # if not recent:
+    #     recentWords = list(listWords)
+
+    print(len(recentWords))
+    ans = {}
+    types = {}
+
+    ans['wordcount'] = len(recentWords)
+    tags = TagsFromWords(recentWords);
+    freqs = Counter(tags)
+    keys = list(freqs.keys())
+    ans['uniqueTags'] = len(list(keys))
+
+    for word in recentWords:
+        for type in word['types']:
+            type = type.title()
+            if type in types:
+                types[type] = types[type] + 1
+            else:
+                types[type] = 1
+    
+    vals = list(types.values())
+    labels = list(types.keys())
+    plt.pie(vals, labels=labels, shadow=True, )
+    plt.legend(title='Breakdown by types of words:', bbox_to_anchor=(1, 0.83), loc="center right", fontsize=10, 
+           bbox_transform=plt.gcf().transFigure)
+    plt.savefig(username + '-types.png')
+    with open(username + '-types.png', "rb") as img_file:
+        imgString = base64.b64encode(img_file.read()).decode('utf-8')
+        if os.path.exists(username + '-types.png'):
+            os.remove(username + '-types.png')
+            print('file removed')
+        
+        ans['types'] = imgString
+        return make_response(jsonify({"msg": ans}))
