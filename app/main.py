@@ -18,7 +18,7 @@ matplotlib.use('Agg')
 
 app = Flask(__name__)
 CORS(app) 
-client = MongoClient('mongodb+srv://ikhurana:ishaan123@cluster0.gc8z6.mongodb.net/db?retryWrites=true&w=majority', ssl_cert_reqs=ssl.CERT_NONE)
+client = MongoClient('mongodb+srv://ikhurana:root@cluster0.gc8z6.mongodb.net/db?retryWrites=true&w=majority', ssl_cert_reqs=ssl.CERT_NONE)
 db = client['db']
 users = db.users
 words = db.words
