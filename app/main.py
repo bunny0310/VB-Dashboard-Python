@@ -66,7 +66,11 @@ def tags():
         os.remove('cloud-' + username + '.png')
         print('file removed')
 
-    return make_response({"msg": str(imgString)})
+    return make_response({
+        'status': True,
+        'code': 200,
+        'imgData': imgString
+    })
 
 @app.route('/monthly-tags-info', methods = ['POST'])
 def infoTags():
@@ -101,7 +105,11 @@ def infoTags():
         if os.path.exists(username + '-pie.png'):
             os.remove(username + '-pie.png')
             print('file removed')
-        return make_response(jsonify({"msg": imgString}))
+        return make_response(jsonify({
+            'code': 200,
+            'status': True,
+            'imageData': imgString
+        }))
 
 @app.route('/acc-info', methods = ['POST'])    
 def info():
@@ -166,4 +174,10 @@ def info():
         #     print('file removed')
         
         ans['types'] = typesImgStr
-        return make_response(jsonify({"msg": ans}))
+        return make_response(jsonify({
+            'code': 200,
+            'status': True,
+            'wordCount': ans['wordcount'],
+            'uniqueTags': ans['uniqueTags'],
+            'imageData': ans['types']
+        }))
