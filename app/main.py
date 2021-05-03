@@ -69,7 +69,7 @@ def tags():
     return make_response({
         'status': True,
         'code': 200,
-        'imgData': imgString
+        'imageData': imgString
     })
 
 @app.route('/monthly-tags-info', methods = ['POST'])
