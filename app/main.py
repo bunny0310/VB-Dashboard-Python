@@ -174,7 +174,6 @@ def info():
         #     print('file removed')
         
         ans['types'] = typesImgStr
-<<<<<<< HEAD
         return make_response(jsonify({
             'code': 200,
             'status': True,
@@ -182,6 +181,3 @@ def info():
             'uniqueTags': ans['uniqueTags'],
             'imageData': ans['types']
         }))
-=======
-        return make_response(jsonify({"msg": ans}))
->>>>>>> a113f4c3e2ba4ea2b3dc7dfa68c0418d6f1109af
